@@ -15,8 +15,8 @@ export function ApplicationSteps({ application }: { application: Application }) 
 }
 ```
 
-- What breaks, and for whom:
-- The fix:
+- What breaks, and for whom: Applicants lose theri place after reloading, the links will not restore
+- The fix: Storing the step in the url resolves this and redirecting to the corrects tep when needed.  
 
 ## 2
 
@@ -29,8 +29,8 @@ export function checkDocument(file: File): string | null {
 // …and the Server Action sends whatever passes this straight on.
 ```
 
-- What breaks, and for whom:
-- The fix:
+- What breaks, and for whom: Applicants with images or large pdf can pass the broswer checklist
+- The fix: Setting the limit to 2MB limit in the broswer and theAPI validating this. 
 
 ## 3
 
@@ -49,8 +49,8 @@ export function checkDocument(file: File): string | null {
 </AlertDialog>
 ```
 
-- What breaks, and for whom:
-- The fix:
+- What breaks, and for whom: An officers cannot tell what will ahppening after clicking ok and the alert dialog closes before an API error can be read.
+- The fix: Show the API preview first and then cancel. 
 
 ## 4
 
@@ -71,8 +71,8 @@ export function TraderSearch() {
 }
 ```
 
-- What breaks, and for whom:
-- The fix:
+- What breaks, and for whom: Officers send a request on every key typed also including invalid onecharacters
+- The fix:Ignoring over limit requests.
 
 ## 5
 

@@ -107,8 +107,8 @@ export async function generateMetadata({ params }: PageProps<'/traders/[id]'>) {
 }
 ```
 
-- What breaks, and for whom:
-- The fix:
+- What breaks, and for whom: A users name and phonemay show appear in browser
+- The fix: Using a static title fixes this. 
 
 ## 8
 
@@ -121,5 +121,5 @@ Disallow: /applications
 
 …and the signed-in layout sets `robots: { index: false }`.
 
-- What breaks, and for whom:
-- The fix:
+- What breaks, and for whom: invites cannot read noindex and full URLs may appear in search result 
+- The fix: settin noindex in robot.txt and allow: '/'.

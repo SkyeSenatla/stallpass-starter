@@ -5,6 +5,7 @@ import { ErrorView } from '@/components/ErrorView'
 import { PermitStatusBadge } from '@/components/PermitStatusBadge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { readOrFail, signedInApi } from '@/lib/api'
+import { Button } from 'radix-ui/toolbar'
 
 // One trader and their permit, ready-made. Round 2 adds the revoke dialog.
 export default function TraderPage({ params }: PageProps<'/traders/[id]'>) {
@@ -49,7 +50,10 @@ async function TraderDetails({ params }: Pick<PageProps<'/traders/[id]'>, 'param
           </>
         )}
       </dl>
-      {/* Round 2: while the permit is active, the revoke dialog goes here. */}
+      {/* Round 2: while the permit is active, the revoke dialog goes here. */
+      <dd>{trader.stallTypeName}</dd>
+      <Button><dt className= "text-muted-background">Revoke</dt></Button>
+      }
     </section>
   )
 }

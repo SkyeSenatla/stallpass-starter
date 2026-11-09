@@ -29,8 +29,8 @@ export function checkDocument(file: File): string | null {
 // …and the Server Action sends whatever passes this straight on.
 ```
 
-- What breaks, and for whom:
-- The fix:
+- What breaks, and for whom: For the error messager for null, the program.
+- The fix: 
 
 ## 3
 
@@ -49,8 +49,8 @@ export function checkDocument(file: File): string | null {
 </AlertDialog>
 ```
 
-- What breaks, and for whom:
-- The fix:
+- What breaks, and for whom: The Ok button. For the user.
+- The fix: referencing the variant "destructive" on the Ok button
 
 ## 4
 
@@ -71,8 +71,8 @@ export function TraderSearch() {
 }
 ```
 
-- What breaks, and for whom:
-- The fix:
+- What breaks, and for whom: Input values, for the system/program.
+- The fix: It must have an input reference.
 
 ## 5
 
@@ -81,8 +81,8 @@ export function TraderSearch() {
 toast.error('That file is too big. The limit is 2 MB.')
 ```
 
-- What breaks, and for whom:
-- The fix:
+- What breaks, and for whom: Error message. For the program.
+- The fix: toast.error(next.failure.message, description...)
 
 ## 6
 
@@ -94,8 +94,8 @@ it('shows the API message under the field', async () => {
 })
 ```
 
-- What breaks, and for whom:
-- The fix:
+- What breaks, and for whom: The description line,l fopr the program.
+- The fix: Semi-colon
 
 ## 7
 
@@ -107,8 +107,8 @@ export async function generateMetadata({ params }: PageProps<'/traders/[id]'>) {
 }
 ```
 
-- What breaks, and for whom:
-- The fix:
+- What breaks, and for whom: The program, After the PageProps.
+- The fix: Promise<MetaData>
 
 ## 8
 
@@ -121,5 +121,5 @@ Disallow: /applications
 
 …and the signed-in layout sets `robots: { index: false }`.
 
-- What breaks, and for whom:
-- The fix:
+- What breaks, and for whom: Disallow. User
+- The fix: Changing the diallow to allow.

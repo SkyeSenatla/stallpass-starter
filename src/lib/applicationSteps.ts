@@ -36,6 +36,24 @@ export type FlowState =
 //
 // Round 1: write this, then test it in Round 3. It's pure: no fetching, no
 // redirecting. The page does those with what it returns.
-export function resolveStep(requested: Step | null, application: Application): FlowState {
-  throw new Error(`resolveStep isn't written yet (asked for ${requested ?? 'no step'} on ${application.id})`)
+  export function resolveStep(
+  requested: Step | null,
+  application: Application,
+): FlowState {
+  if (application.status === 'submitted') {return { kind: 'submitted' }}
+
+  const missing = application.requiredDocuments
+    .filter((required) =>
+      !application.documents.some((document) => document.kind === required.kind),
+    )
+    .map((required) => required.label)
+
+  if (requested === null || (requested === 'review' && missing.length > 0)) {
+    return {
+      kind: 'redirect',
+      step: missing.length > 0 ? 'documents' : 'review',
+    }
+  }
+
+  return { kind: 'step', step: requested, missing }
 }

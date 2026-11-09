@@ -24,7 +24,7 @@ export async function login(_previous: LoginState, formData: FormData): Promise<
   }
   // StallPass: both tokens are in the body, snake_case. No Set-Cookie.
   const accessToken = signIn.data.access_token
-  const refreshToken = signIn.data.refresh_token
+  const refreshToken = signIn.data.access_token
 
   // Who is this? Ask once now, so every page can choose links by role.
   const me = await publicApi().GET('/api/v1/me', { headers: { Authorization: `Bearer ${accessToken}` } })

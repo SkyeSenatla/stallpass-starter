@@ -6,6 +6,9 @@ import type { TradingDay } from '@/api/types'
 import { signedInApi } from '@/lib/api'
 import { tradingDays } from '@/lib/days'
 import { describeError } from '@/lib/errorMessages'
+import { revalidatePath } from 'next/cache'
+import { documentLimit } from '@/lib/documentCheck'
+import type { DocumentKind } from '@/api/types'
 
 // The three-step application. Every step saves to the API as it goes, so
 // nothing lives only in the browser. Each action is a public POST like any
@@ -66,4 +69,78 @@ export async function saveDetails(applicationId: string | null, _previous: Detai
   }
 
   redirect(`/applications/${result.data.id}?step=documents`)
+}
+
+type MutationResult =
+  | { ok: true }
+  | { ok: false; message: string; reference?: string | null; field?: boolean }
+
+function mutationResult(
+  response: Response,
+  body: unknown,
+  field?: string,
+): MutationResult {
+  if (response.ok) return { ok: true }
+  if (response.status === 401) redirect('/login?expired=1')
+
+  const error = ApiError.from(response, body)
+  const fieldMessage = field ? error.fieldErrors[field]?.[0] : undefined
+
+  return {
+    ok: false,
+    message: fieldMessage ?? describeError(error),
+    reference: error.correlationId,
+    field: Boolean(fieldMessage),
+  }
+}
+
+export async function uploadDocument(
+  id: string,
+  kind: DocumentKind,
+  form: FormData,
+): Promise<MutationResult> {
+  const { api } = await signedInApi()
+  const file = form.get('file')
+
+  if (!(file instanceof File) || file.size === 0 || file.size > documentLimit) {
+    return { ok: false, field: true, message: 'Choose a non-empty file up to 2 MB.' }
+  }
+
+  const multipart = new FormData()
+  multipart.set('kind', kind)
+  multipart.set('file', file)
+
+  const result = await api.POST('/api/v1/applications/{id}/documents', {
+    params: { path: { id } },
+    body: { kind, file: file.name },
+    bodySerializer: () => multipart,
+  })
+
+  if (result.response.ok) revalidatePath(`/applications/${id}`)
+  return mutationResult(result.response, result.error, 'file')
+}
+
+export async function removeDocument(
+  id: string,
+  documentId: string,
+): Promise<MutationResult> {
+  const { api } = await signedInApi()
+  const result = await api.DELETE(
+    '/api/v1/applications/{id}/documents/{documentId}',
+    { params: { path: { id, documentId } } },
+  )
+
+  if (result.response.ok) revalidatePath(`/applications/${id}`)
+  return mutationResult(result.response, result.error)
+}
+
+export async function submitApplication(id: string): Promise<MutationResult> {
+  const { api } = await signedInApi()
+  const result = await api.POST('/api/v1/applications/{id}/submit', {
+    params: { path: { id } },
+  })
+
+  if (!result.response.ok) return mutationResult(result.response, result.error)
+  revalidatePath('/applications')
+  return { ok: true }
 }

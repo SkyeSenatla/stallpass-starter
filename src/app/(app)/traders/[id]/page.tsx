@@ -49,7 +49,10 @@ async function TraderDetails({ params }: Pick<PageProps<'/traders/[id]'>, 'param
           </>
         )}
       </dl>
-      {/* Round 2: while the permit is active, the revoke dialog goes here. */}
+      {/* Round 2: while the permit is active, the revoke dialog goes here. */
+      <>
+      </>
+      }
     </section>
   )
 }

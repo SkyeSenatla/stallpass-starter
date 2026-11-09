@@ -81,8 +81,8 @@ export function TraderSearch() {
 toast.error('That file is too big. The limit is 2 MB.')
 ```
 
-- What breaks, and for whom:
-- The fix:
+- What breaks, and for whom: A user may not know which part of the error needs attention.
+- The fix: Shopwing the error at the exact correct field.
 
 ## 6
 
@@ -94,8 +94,8 @@ it('shows the API message under the field', async () => {
 })
 ```
 
-- What breaks, and for whom:
-- The fix:
+- What breaks, and for whom: There is already an input by findByLabelText 
+- The fix: Waiting for the error message can fix this.
 
 ## 7
 

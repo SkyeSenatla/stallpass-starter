@@ -12,12 +12,7 @@ import { getStallTypes } from '@/lib/stallTypes'
 import { DetailsForm } from '../DetailsForm'
 import { DocumentRow, StepHeading, SubmitApplication } from './ApplicationControls'
 
-type ApplicationPageProps = {
-  params: Promise<{ id: string }>
-  searchParams: Promise<Record<string, string | string[] | undefined>>
-}
-
-export default function ApplicationPage(props: ApplicationPageProps) {
+export default function ApplicationPage(props: PageProps<'/applications/[id]'>) {
   return (
     <Suspense fallback={<CardSkeletons label="Loading application" />}>
       <ApplicationFlow {...props} />
@@ -28,7 +23,7 @@ export default function ApplicationPage(props: ApplicationPageProps) {
 async function ApplicationFlow({
   params,
   searchParams,
-}: ApplicationPageProps) {
+}: PageProps<'/applications/[id]'>) {
   const [{ id }, query, { api }] = await Promise.all([
     params,
     searchParams,

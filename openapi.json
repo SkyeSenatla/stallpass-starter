@@ -1,0 +1,1105 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "StallPass API",
+    "version": "1.0.0",
+    "description": "Stall permits for street traders at Warwick Junction, eThekwini. Every error is application/problem+json with a correlationId; a 400 also has an errors map keyed by field or query parameter name. Access tokens are JWTs that last 300 seconds; refresh tokens rotate, and presenting a spent one revokes every token in its family. Money is in cents."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4200"
+    }
+  ],
+  "security": [
+    {
+      "bearer": []
+    }
+  ],
+  "paths": {
+    "/api/v1/stall-types": {
+      "get": {
+        "summary": "The kinds of stall, their fees and the documents each needs. Public: no token.",
+        "responses": {
+          "200": {
+            "description": "Stall types",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StallType"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "summary": "Sign in. Returns both tokens in the body.",
+        "responses": {
+          "200": {
+            "description": "Signed in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "summary": "New tokens for a refresh token. Each refresh token works once.",
+        "responses": {
+          "200": {
+            "description": "New tokens",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "summary": "Revoke a refresh token and its family.",
+        "responses": {
+          "204": {
+            "description": "Signed out"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "summary": "Who is signed in.",
+        "responses": {
+          "200": {
+            "description": "The signed-in person",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/api/v1/applications": {
+      "get": {
+        "summary": "The signed-in trader's applications.",
+        "responses": {
+          "200": {
+            "description": "Applications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Application"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      },
+      "post": {
+        "summary": "Start an application, as a draft.",
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Application"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationProblem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "description": "A trader has one draft at a time: a second is a 409 whose applicationId is the draft in progress.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationDetails"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/applications/{id}": {
+      "get": {
+        "summary": "One application. 404 if it is not yours.",
+        "responses": {
+          "200": {
+            "description": "The application",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Application"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The application's id, like A-2041"
+          }
+        ]
+      },
+      "put": {
+        "summary": "Change a draft's details.",
+        "responses": {
+          "200": {
+            "description": "Changed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Application"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationProblem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "description": "Documents the new stall type no longer asks for are removed. 409 once submitted.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationDetails"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The application's id, like A-2041"
+          }
+        ]
+      }
+    },
+    "/api/v1/applications/{id}/documents": {
+      "post": {
+        "summary": "Upload a document. The same kind again replaces the one before.",
+        "responses": {
+          "201": {
+            "description": "Uploaded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadedDocument"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationProblem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "415": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "description": "400 with errors.file for a file over 2 MB or not a PDF, JPEG or PNG; errors.kind for a kind this application does not ask for.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadDocumentForm"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The application's id, like A-2041"
+          }
+        ]
+      }
+    },
+    "/api/v1/applications/{id}/documents/{documentId}": {
+      "delete": {
+        "summary": "Remove a document from a draft.",
+        "responses": {
+          "204": {
+            "description": "Removed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The application's id, like A-2041"
+          },
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The document's id, like D-9003"
+          }
+        ]
+      }
+    },
+    "/api/v1/applications/{id}/submit": {
+      "post": {
+        "summary": "Submit a draft.",
+        "responses": {
+          "200": {
+            "description": "Submitted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Application"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "description": "422, with missing, while a required document is not uploaded. 409 if already submitted.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The application's id, like A-2041"
+          }
+        ]
+      }
+    },
+    "/api/v1/traders": {
+      "get": {
+        "summary": "Search traders. Permits officers only.",
+        "responses": {
+          "200": {
+            "description": "Matching traders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TraderSearchResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationProblem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 60
+            },
+            "description": "Part of a name or permit number. Absent or empty: everyone. One character is a 400 ('Type at least 2 characters.')."
+          }
+        ]
+      }
+    },
+    "/api/v1/traders/{id}": {
+      "get": {
+        "summary": "One trader and their permit. Permits officers only.",
+        "responses": {
+          "200": {
+            "description": "The trader",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Trader"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The trader's id, like T-01"
+          }
+        ]
+      }
+    },
+    "/api/v1/permits/{permitNumber}/revocation-preview": {
+      "get": {
+        "summary": "What revoking this permit would do. Permits officers only.",
+        "responses": {
+          "200": {
+            "description": "The consequences",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevocationPreview"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "description": "409 if the permit is already revoked.",
+        "parameters": [
+          {
+            "name": "permitNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Like P-1004"
+          }
+        ]
+      }
+    },
+    "/api/v1/permits/{permitNumber}/revoke": {
+      "post": {
+        "summary": "Revoke a permit. Permits officers only.",
+        "responses": {
+          "200": {
+            "description": "Revoked: the trader, as it is now",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Trader"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationProblem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "description": "Cancels the upcoming bookings in the preview. 400 with errors.reason for a reason under 10 characters; 409 if already revoked.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeRequest"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "permitNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Like P-1004"
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "responses": {
+      "Problem": {
+        "description": "A problem",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "ValidationProblem": {
+        "description": "Invalid input: see errors",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Problem": {
+        "type": "object",
+        "required": [
+          "title",
+          "status",
+          "correlationId"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "correlationId": {
+            "type": "string",
+            "description": "Quote it when you report a problem."
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "On a 400: messages keyed by field or query parameter name."
+          },
+          "missing": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RequiredDocument"
+            },
+            "description": "On the 422 from submit: the documents still to upload."
+          },
+          "applicationId": {
+            "type": "string",
+            "description": "On the 409 from creating an application: the one already in progress."
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "RefreshRequest": {
+        "type": "object",
+        "required": [
+          "refresh_token"
+        ],
+        "properties": {
+          "refresh_token": {
+            "type": "string"
+          }
+        }
+      },
+      "TokenResponse": {
+        "type": "object",
+        "required": [
+          "access_token",
+          "refresh_token",
+          "token_type",
+          "expires_in"
+        ],
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "refresh_token": {
+            "type": "string"
+          },
+          "token_type": {
+            "type": "string",
+            "const": "Bearer"
+          },
+          "expires_in": {
+            "type": "integer",
+            "description": "Seconds until the access token expires (300)."
+          }
+        }
+      },
+      "Role": {
+        "type": "string",
+        "enum": [
+          "trader",
+          "officer"
+        ]
+      },
+      "Me": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "email",
+          "role"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          }
+        }
+      },
+      "DocumentKind": {
+        "type": "string",
+        "enum": [
+          "id-copy",
+          "proof-of-address",
+          "health-certificate",
+          "healer-registration"
+        ]
+      },
+      "RequiredDocument": {
+        "type": "object",
+        "required": [
+          "kind",
+          "label"
+        ],
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/DocumentKind"
+          },
+          "label": {
+            "type": "string",
+            "description": "What to call it on screen."
+          }
+        }
+      },
+      "StallType": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "feeCents",
+          "requiredDocuments"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "feeCents": {
+            "type": "integer",
+            "description": "The yearly permit fee, in cents."
+          },
+          "requiredDocuments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RequiredDocument"
+            }
+          }
+        }
+      },
+      "TradingDay": {
+        "type": "string",
+        "enum": [
+          "mon",
+          "tue",
+          "wed",
+          "thu",
+          "fri",
+          "sat"
+        ],
+        "description": "The market is closed on Sundays."
+      },
+      "ApplicationStatus": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "submitted"
+        ]
+      },
+      "ApplicationDetails": {
+        "type": "object",
+        "required": [
+          "stallTypeId",
+          "tradingName",
+          "tradingDays"
+        ],
+        "properties": {
+          "stallTypeId": {
+            "type": "string"
+          },
+          "tradingName": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 60
+          },
+          "tradingDays": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/TradingDay"
+            },
+            "description": "Each day once."
+          }
+        }
+      },
+      "UploadedDocument": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "label",
+          "fileName",
+          "sizeBytes",
+          "uploadedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/DocumentKind"
+          },
+          "label": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "integer"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Application": {
+        "type": "object",
+        "required": [
+          "id",
+          "stallTypeId",
+          "stallTypeName",
+          "feeCents",
+          "tradingName",
+          "tradingDays",
+          "status",
+          "requiredDocuments",
+          "documents",
+          "createdAt",
+          "submittedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "stallTypeId": {
+            "type": "string"
+          },
+          "stallTypeName": {
+            "type": "string"
+          },
+          "feeCents": {
+            "type": "integer"
+          },
+          "tradingName": {
+            "type": "string"
+          },
+          "tradingDays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradingDay"
+            }
+          },
+          "status": {
+            "$ref": "#/components/schemas/ApplicationStatus"
+          },
+          "requiredDocuments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RequiredDocument"
+            },
+            "description": "What this application's stall type asks for. Changes with the stall type."
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UploadedDocument"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "submittedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "UploadDocumentForm": {
+        "type": "object",
+        "required": [
+          "kind",
+          "file"
+        ],
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/DocumentKind"
+          },
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "description": "PDF, JPEG or PNG, judged by its bytes, up to 2 MB (2 097 152 bytes)."
+          }
+        }
+      },
+      "PermitStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "revoked"
+        ]
+      },
+      "TraderSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "permitNumber",
+          "stallTypeName",
+          "permitStatus"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "permitNumber": {
+            "type": "string"
+          },
+          "stallTypeName": {
+            "type": "string"
+          },
+          "permitStatus": {
+            "$ref": "#/components/schemas/PermitStatus"
+          }
+        }
+      },
+      "TraderSearchResult": {
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TraderSummary"
+            },
+            "description": "At most 20, by name."
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many traders match, even beyond the 20 shown."
+          }
+        }
+      },
+      "Trader": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TraderSummary"
+          },
+          {
+            "type": "object",
+            "required": [
+              "stallTypeId",
+              "phone",
+              "issuedOn",
+              "upcomingBookings",
+              "revokedReason"
+            ],
+            "properties": {
+              "stallTypeId": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              },
+              "issuedOn": {
+                "type": "string",
+                "format": "date"
+              },
+              "upcomingBookings": {
+                "type": "integer"
+              },
+              "revokedReason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "RevocationPreview": {
+        "type": "object",
+        "required": [
+          "permitNumber",
+          "traderName",
+          "bookingsCancelled",
+          "refundCents",
+          "lastTradingDay"
+        ],
+        "properties": {
+          "permitNumber": {
+            "type": "string"
+          },
+          "traderName": {
+            "type": "string"
+          },
+          "bookingsCancelled": {
+            "type": "integer",
+            "description": "Upcoming market-day bookings that revoking cancels."
+          },
+          "refundCents": {
+            "type": "integer",
+            "description": "What the trader is refunded for them, in cents."
+          },
+          "lastTradingDay": {
+            "type": "string",
+            "format": "date",
+            "description": "A South African date."
+          }
+        }
+      },
+      "RevokeRequest": {
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 300,
+            "description": "The trader is told it."
+          }
+        }
+      }
+    }
+  }
+}

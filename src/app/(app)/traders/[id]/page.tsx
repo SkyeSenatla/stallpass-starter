@@ -5,8 +5,8 @@ import { ErrorView } from '@/components/ErrorView'
 import { PermitStatusBadge } from '@/components/PermitStatusBadge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { readOrFail, signedInApi } from '@/lib/api'
+import { RevokeDialog } from './Revoke'
 
-// One trader and their permit, ready-made. Round 2 adds the revoke dialog.
 export default function TraderPage({ params }: PageProps<'/traders/[id]'>) {
   return (
     <div className="space-y-6">
@@ -49,7 +49,9 @@ async function TraderDetails({ params }: Pick<PageProps<'/traders/[id]'>, 'param
           </>
         )}
       </dl>
-      {/* Round 2: while the permit is active, the revoke dialog goes here. */}
+      {trader.permitStatus === 'active' && (
+  <RevokeDialog permitNumber={trader.permitNumber} />
+)}
     </section>
   )
 }

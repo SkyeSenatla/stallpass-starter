@@ -121,5 +121,5 @@ Disallow: /applications
 
 …and the signed-in layout sets `robots: { index: false }`.
 
-- What breaks, and for whom: 
-- The fix:
+- What breaks, and for whom: Disallow. User
+- The fix: Changing the diallow to allow.

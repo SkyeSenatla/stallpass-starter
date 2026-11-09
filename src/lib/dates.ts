@@ -14,3 +14,12 @@ const saDateTime = new Intl.DateTimeFormat('en-ZA', {
 export function formatWhen(isoInstant: string): string {
   return saDateTime.format(new Date(isoInstant))
 }
+const saDay = new Intl.DateTimeFormat('en-ZA', {
+  day: 'numeric',
+  month: 'long',
+  timeZone: 'Africa/Johannesburg',
+})
+
+export function formatDay(isoDate: string): string {
+  return saDay.format(new Date(isoDate))
+}

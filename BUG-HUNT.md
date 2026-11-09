@@ -29,8 +29,8 @@ export function checkDocument(file: File): string | null {
 // …and the Server Action sends whatever passes this straight on.
 ```
 
-- What breaks, and for whom:
-- The fix:
+- What breaks, and for whom: only accepts pdfs, the size doesnt matter
+- The fix: check the document type and the size of the file.
 
 ## 3
 
@@ -94,7 +94,7 @@ it('shows the API message under the field', async () => {
 })
 ```
 
-- What breaks, and for whom:
+- What breaks, and for whom: checks for error messages
 - The fix:
 
 ## 7

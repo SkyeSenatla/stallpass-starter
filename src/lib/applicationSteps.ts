@@ -1,6 +1,5 @@
 import { createLoader, parseAsStringLiteral } from 'nuqs/server'
-import type { Application } from '@/api/types'
-
+import type { Application, DocumentKind  } from '@/api/types'
 // A stall application as a state machine (Week 9 Day 1).
 //
 // While it's a draft, the application is in exactly one of three steps.
@@ -38,4 +37,16 @@ export type FlowState =
 // redirecting. The page does those with what it returns.
 export function resolveStep(requested: Step | null, application: Application): FlowState {
   throw new Error(`resolveStep isn't written yet (asked for ${requested ?? 'no step'} on ${application.id})`)
+}
+
+  const uploaded = new Set(application.documents.map((document) => document.kind))
+  const missing = application.requiredDocuments
+    .filter((required) => !uploaded.has(required.kind))
+    .map((required) => required.label)
+  
+    const firstWithWorkLeft: Step = missing.length > 0 ? 'documents' : 'review'
+
+  if (requested === null) return { kind: 'redirect', step: firstWithWorkLeft }
+  if (requested === 'review' && missing.length > 0) return { kind: 'redirect', step: 'documents' }
+  return { kind: 'step', step: requested, missing }
 }

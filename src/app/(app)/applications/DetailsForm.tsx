@@ -12,6 +12,7 @@ import { formatCents } from '@/lib/money'
 
 // Step 1, on /apply (no draft yet) and when the person comes Back to it.
 // What they typed is kept after a refusal: values come back in the state.
+type Props = { application: Application; stallTypes: components['schemas']['StallType'][] }
 export function DetailsForm({
   applicationId,
   stallTypes,
